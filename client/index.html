@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProxyWave | High-Performance Remote Desktop</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Landing / Setup Screen -->
+        <div id="setup-screen" class="screen active">
+            <div class="glass-card">
+                <header>
+                    <div class="logo">
+                        <span class="icon">🌊</span>
+                        <h1>Proxy<span>Wave</span></h1>
+                    </div>
+                    <p>High-performance remote sharing & collaboration</p>
+                </header>
+
+                <div class="tabs">
+                    <button id="tab-host" class="tab-btn active">Host Session</button>
+                    <button id="tab-join" class="tab-btn">Join Session</button>
+                </div>
+
+                <div id="host-panel" class="tab-content active">
+                    <div class="input-group">
+                        <label for="host-password">Set Access Password</label>
+                        <input type="password" id="host-password" placeholder="Enter a secure password">
+                    </div>
+                    <button id="start-host-btn" class="primary-btn">Start Sharing Screen</button>
+                </div>
+
+                <div id="join-panel" class="tab-content">
+                    <div class="input-group">
+                        <label for="room-id">Session ID</label>
+                        <input type="text" id="room-id" placeholder="Enter Session ID">
+                    </div>
+                    <div class="input-group">
+                        <label for="join-password">Password</label>
+                        <input type="password" id="join-password" placeholder="Enter Password">
+                    </div>
+                    <button id="join-btn" class="primary-btn">Connect & Control</button>
+                </div>
+
+                <div class="status-bar" id="setup-status">
+                    Connecting to signaling server...
+                </div>
+            </div>
+        </div>
+
+        <!-- Meeting / Stream Screen -->
+        <div id="meeting-screen" class="screen">
+            <nav class="meeting-nav">
+                <div class="session-info">
+                    <span class="session-id-tag">ID: <b id="display-room-id">...</b></span>
+                    <span class="status-tag pulse" id="connection-status">Live</span>
+                </div>
+                <div class="controls-center">
+                    <button class="icon-btn" id="btn-toggle-mic" title="Mute/Unmute">
+                        <span class="icon">🎤</span>
+                    </button>
+                    <button class="icon-btn" id="btn-toggle-chat" title="Toggle Chat">
+                        <span class="icon">💬</span>
+                    </button>
+                    <button class="icon-btn danger" id="btn-leave" title="Leave">
+                        <span class="icon">📞</span>
+                    </button>
+                </div>
+                <div class="participant-count">
+                    <span class="icon">👥</span>
+                    <span id="member-count">1</span>
+                </div>
+            </nav>
+
+            <main class="video-container">
+                <div id="remote-video-wrapper" class="video-wrapper">
+                    <video id="remote-video" autoplay playsinline></video>
+                    <div class="overlay-info" id="control-overlay">
+                        Waiting for host screen...
+                    </div>
+                    <div id="cursor-layer"></div>
+                </div>
+            </main>
+
+            <aside id="chat-panel" class="glass-panel collapsed">
+                <div class="chat-header">
+                    <h3>Chat</h3>
+                    <button id="close-chat">✕</button>
+                </div>
+                <div id="chat-messages"></div>
+                <div class="chat-input">
+                    <input type="text" id="msg-input" placeholder="Type a message...">
+                    <button id="send-btn">Send</button>
+                </div>
+            </aside>
+        </div>
+    </div>
+    <script src="main.js" type="module"></script>
+</body>
+
+</html>
