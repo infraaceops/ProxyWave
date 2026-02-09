@@ -19,6 +19,11 @@
     <div id="app">
         <!-- Landing / Setup Screen -->
         <div id="setup-screen" class="screen active">
+            <div class="window-controls">
+                <button id="win-min" class="win-btn">－</button>
+                <button id="win-max" class="win-btn">▢</button>
+                <button id="win-close" class="win-btn danger">✕</button>
+            </div>
             <div class="glass-card">
                 <header>
                     <div class="logo">
@@ -59,11 +64,32 @@
             </div>
         </div>
 
+        <!-- Screen Selection Modal -->
+        <div id="screen-modal" class="modal-overlay">
+            <div class="modal-card glass-card">
+                <h3>Select Screen to Share</h3>
+                <div id="sources-list" class="sources-grid">
+                    <!-- Screen sources will be injected here -->
+                    <div class="loading-sources">Loading available screens...</div>
+                </div>
+                <div class="modal-actions">
+                    <button id="cancel-share" class="secondary-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Meeting / Stream Screen -->
         <div id="meeting-screen" class="screen">
             <nav class="meeting-nav">
+                <div class="window-controls meeting-controls">
+                    <button class="win-btn drag-region">ProxyWave</button>
+                    <button id="m-win-min" class="win-btn">－</button>
+                    <button id="m-win-max" class="win-btn">▢</button>
+                    <button id="m-win-close" class="win-btn danger">✕</button>
+                </div>
                 <div class="session-info">
-                    <span class="session-id-tag">ID: <b id="display-room-id">...</b></span>
+                    <span class="session-id-tag">ID: <b id="display-room-id">...</b> <button id="copy-id-btn"
+                            class="mini-icon-btn" title="Copy ID">📋</button></span>
                     <span class="status-tag pulse" id="connection-status">Live</span>
                 </div>
                 <div class="controls-center">

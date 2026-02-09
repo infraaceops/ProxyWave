@@ -32,13 +32,13 @@
         "files": [
             "main.js",
             "preload.js",
+            "RemoteControl.exe",
             "client/**/*",
             "node_modules/**/*"
         ]
     },
     "dependencies": {
-        "peerjs": "^1.5.1",
-        "robotjs": "^0.6.0"
+        "peerjs": "^1.5.1"
     },
     "devDependencies": {
         "electron": "^28.0.0",

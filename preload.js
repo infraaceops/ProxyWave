@@ -6,5 +6,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     type: (key) => ipcRenderer.send('remote-control:type', key),
     getMachineInfo: () => ipcRenderer.invoke('get-machine-info'),
     getScreenSources: () => ipcRenderer.invoke('get-screen-sources'),
+    minimizeWindow: () => ipcRenderer.send('window:minimize'),
+    maximizeWindow: () => ipcRenderer.send('window:maximize'),
+    closeWindow: () => ipcRenderer.send('window:close'),
     isElectron: true
 });

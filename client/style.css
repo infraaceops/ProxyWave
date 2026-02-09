@@ -18,10 +18,26 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    background: radial-gradient(circle at top right, #1a1a2e, #0a0a0c);
+    background: radial-gradient(circle at top right, #1a1a2e, #0a0a0c, #16213e);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
     color: var(--text);
     height: 100vh;
     overflow: hidden;
+}
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 #app {
@@ -39,6 +55,64 @@ body {
 
 .screen.active {
     display: flex;
+}
+
+/* Window Controls */
+.window-controls {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 10px;
+    background: rgba(0, 0, 0, 0.2);
+    -webkit-app-region: drag;
+    z-index: 2000;
+}
+
+.meeting-controls {
+    position: relative;
+    background: none;
+    height: auto;
+    width: auto;
+    padding: 0;
+}
+
+.win-btn {
+    -webkit-app-region: no-drag;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    width: 40px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.win-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text);
+}
+
+.win-btn.danger:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.drag-region {
+    flex: 1;
+    justify-content: flex-start;
+    padding-left: 15px;
+    font-weight: 600;
+    color: var(--text);
+    pointer-events: none;
 }
 
 /* Landing Screen */
@@ -204,6 +278,21 @@ input:focus {
     text-transform: uppercase;
     font-weight: 700;
     color: var(--success);
+}
+
+.mini-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-left: 8px;
+    padding: 2px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.mini-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .video-container {
@@ -391,4 +480,83 @@ video {
     padding: 8px 16px;
     border-radius: 8px;
     cursor: pointer;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-card {
+    max-width: 600px !important;
+    width: 90% !important;
+}
+
+.sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.source-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.source-item:hover {
+    background: var(--primary);
+    transform: translateY(-4px);
+}
+
+.source-item img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.source-item span {
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
 }

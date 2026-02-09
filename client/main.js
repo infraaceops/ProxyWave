@@ -55,14 +55,18 @@ function setupPeerListeners() {
         updateStatus('Client connected, authenticating...');
     });
 
-    // Handling Incoming Call (Guest Side)
     peer.on('call', (call) => {
         call.answer();
         call.on('stream', (remoteStream) => {
             videoElement.srcObject = remoteStream;
             document.getElementById('control-overlay').style.display = 'none';
-            updateStatus('Connected & Receiving Stream');
+            updateStatus('Receiving Stream');
             setupGuestInteraction();
+        });
+
+        call.on('close', () => {
+            updateStatus('Stream Closed');
+            videoElement.srcObject = null;
         });
     });
 }
@@ -106,27 +110,82 @@ async function startHost() {
     if (!password) return alert('Please set a password');
     hostPassword = password;
 
-    try {
-        localStream = await navigator.mediaDevices.getDisplayMedia({
-            video: {
-                cursor: "always",
-                frameRate: { ideal: 60, max: 60 }
-            },
-            audio: true
-        });
-
-        isHost = true;
-        showMeetingScreen(peer.id);
-        saveSession(peer.id, password, true);
-
-        // Notify session for re-connection
-        updateStatus('Waiting for guest...');
-
-    } catch (err) {
-        console.error("Failed to share screen:", err);
-        alert("Screen sharing failed or cancelled.");
+    if (window.electronAPI) {
+        showScreenSelector();
+    } else {
+        // Fallback for browser (though this app is designed for Electron)
+        try {
+            localStream = await navigator.mediaDevices.getDisplayMedia({
+                video: { cursor: "always" },
+                audio: true
+            });
+            completeHostSetup();
+        } catch (err) {
+            console.error("Failed to share screen:", err);
+        }
     }
 }
+
+async function showScreenSelector() {
+    const modal = document.getElementById('screen-modal');
+    const list = document.getElementById('sources-list');
+    modal.classList.add('active');
+    list.innerHTML = '<div class="loading-sources">Loading screens...</div>';
+
+    try {
+        const sources = await window.electronAPI.getScreenSources();
+        list.innerHTML = '';
+
+        sources.forEach(source => {
+            const item = document.createElement('div');
+            item.className = 'source-item';
+            item.innerHTML = `
+                <img src="${source.thumbnail.toDataURL()}" alt="${source.name}">
+                <span>${source.name}</span>
+            `;
+            item.onclick = () => selectSource(source.id);
+            list.appendChild(item);
+        });
+    } catch (err) {
+        console.error("Error fetching sources:", err);
+        list.innerHTML = '<div class="error">Failed to load screens.</div>';
+    }
+}
+
+async function selectSource(sourceId) {
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({
+            audio: false, // Audio usually requires more complex setup in Electron desktopCapture
+            video: {
+                mandatory: {
+                    chromeMediaSource: 'desktop',
+                    chromeMediaSourceId: sourceId,
+                    minWidth: 1280,
+                    maxWidth: 1920,
+                    minHeight: 720,
+                    maxHeight: 1080
+                }
+            }
+        });
+
+        document.getElementById('screen-modal').classList.remove('active');
+        completeHostSetup();
+    } catch (err) {
+        console.error("Error selecting source:", err);
+        alert("Could not share selected screen.");
+    }
+}
+
+function completeHostSetup() {
+    isHost = true;
+    showMeetingScreen(peer.id);
+    saveSession(peer.id, hostPassword, true);
+    updateStatus('Waiting for guest...');
+}
+
+document.getElementById('cancel-share').onclick = () => {
+    document.getElementById('screen-modal').classList.remove('active');
+};
 
 function joinSession() {
     const roomId = document.getElementById('room-id').value;
@@ -317,5 +376,29 @@ document.getElementById('btn-toggle-chat').onclick = () => {
 document.getElementById('close-chat').onclick = () => {
     chatPanel.classList.remove('active-panel');
 };
+
+document.getElementById('copy-id-btn').onclick = () => {
+    const id = document.getElementById('display-room-id').innerText;
+    navigator.clipboard.writeText(id).then(() => {
+        const btn = document.getElementById('copy-id-btn');
+        const originalText = btn.innerText;
+        btn.innerText = '✅';
+        setTimeout(() => btn.innerText = originalText, 2000);
+    });
+};
+
+// Window Controls
+const attachWinEvents = (prefix = '') => {
+    const min = document.getElementById(prefix + 'win-min');
+    const max = document.getElementById(prefix + 'win-max');
+    const close = document.getElementById(prefix + 'win-close');
+
+    if (min) min.onclick = () => window.electronAPI.minimizeWindow();
+    if (max) max.onclick = () => window.electronAPI.maximizeWindow();
+    if (close) close.onclick = () => window.electronAPI.closeWindow();
+};
+
+attachWinEvents();      // Landing Screen
+attachWinEvents('m-');  // Meeting Screen
 
 
