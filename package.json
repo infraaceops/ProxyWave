@@ -1,6 +1,6 @@
 {
     "name": "proxy-wave",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "High-performance Remote Desktop & Screen Sharing",
     "author": "Shadab <shadab@infraaceops.com>",
     "main": "main.js",
@@ -17,12 +17,15 @@
         "directories": {
             "output": "dist"
         },
+        "icon": "assets/icon.png",
         "win": {
-            "target": "nsis"
+            "target": "nsis",
+            "icon": "assets/icon.png"
         },
         "mac": {
             "target": "dmg",
-            "category": "public.app-category.video"
+            "category": "public.app-category.video",
+            "icon": "assets/icon.png"
         },
         "linux": {
             "target": [
@@ -34,6 +37,7 @@
             "main.js",
             "preload.js",
             "RemoteControl.exe",
+            "assets/icon.png",
             "client/**/*",
             "node_modules/**/*"
         ]
