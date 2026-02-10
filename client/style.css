@@ -79,6 +79,8 @@ body {
     height: auto;
     width: auto;
     padding: 0;
+    justify-content: flex-start;
+    /* Move to top left */
 }
 
 .win-btn {
@@ -357,6 +359,11 @@ video {
 .icon-btn.danger {
     background: var(--danger);
     border-color: rgba(255, 255, 255, 0.2);
+}
+
+.icon-btn.muted {
+    background: var(--danger);
+    color: white;
 }
 
 .pulse {

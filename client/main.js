@@ -55,13 +55,25 @@ function setupPeerListeners() {
         updateStatus('Client connected, authenticating...');
     });
 
-    peer.on('call', (call) => {
-        call.answer();
+    peer.on('call', async (call) => {
+        let streamToProvide = null;
+        try {
+            // Try to get mic for bidirectional audio
+            streamToProvide = await navigator.mediaDevices.getUserMedia({ audio: true });
+            streamToProvide.getAudioTracks().forEach(t => t.enabled = false); // Start muted
+            document.getElementById('btn-toggle-mic').classList.add('muted');
+        } catch (e) {
+            console.warn("Guest mic access denied or not available", e);
+        }
+
+        call.answer(streamToProvide);
+
         call.on('stream', (remoteStream) => {
             videoElement.srcObject = remoteStream;
             document.getElementById('control-overlay').style.display = 'none';
             updateStatus('Receiving Stream');
             setupGuestInteraction();
+            if (streamToProvide) localStream = streamToProvide; // Store for toggle
         });
 
         call.on('close', () => {
@@ -154,8 +166,8 @@ async function showScreenSelector() {
 
 async function selectSource(sourceId) {
     try {
-        localStream = await navigator.mediaDevices.getUserMedia({
-            audio: false, // Audio usually requires more complex setup in Electron desktopCapture
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: false,
             video: {
                 mandatory: {
                     chromeMediaSource: 'desktop',
@@ -168,6 +180,19 @@ async function selectSource(sourceId) {
             }
         });
 
+        // Combine with Microphone for "Talking"
+        try {
+            const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioStream.getAudioTracks().forEach(track => {
+                track.enabled = false; // Start muted by default
+                stream.addTrack(track);
+            });
+            document.getElementById('btn-toggle-mic').classList.add('muted');
+        } catch (e) {
+            console.warn("Microphone not available:", e);
+        }
+
+        localStream = stream;
         document.getElementById('screen-modal').classList.remove('active');
         completeHostSetup();
     } catch (err) {
@@ -210,7 +235,14 @@ function setupDataListeners() {
             case 'auth':
                 if (data.password === hostPassword) {
                     conn.send({ type: 'auth-success' });
-                    peer.call(conn.peer, localStream);
+                    const call = peer.call(conn.peer, localStream);
+                    call.on('stream', (guestStream) => {
+                        // Host receiving Guest's audio
+                        const audio = document.createElement('audio');
+                        audio.srcObject = guestStream;
+                        audio.autoplay = true;
+                        document.body.appendChild(audio);
+                    });
                     updateStatus('Guest Authenticated');
                 } else {
                     conn.send({ type: 'auth-fail' });
@@ -243,6 +275,12 @@ function setupDataListeners() {
                 if (isHost) {
                     showClickRipple(data.x, data.y);
                     if (window.electronAPI) window.electronAPI.click(data.x, data.y);
+                }
+                break;
+
+            case 'keyboard-key':
+                if (isHost && window.electronAPI) {
+                    window.electronAPI.type(data.key);
                 }
                 break;
         }
@@ -278,6 +316,17 @@ function setupGuestInteraction() {
         const x = (e.clientX - rect.left) / rect.width;
         const y = (e.clientY - rect.top) / rect.height;
         conn.send({ type: 'mouse-click', x, y });
+    };
+
+    window.onkeydown = (e) => {
+        if (!conn || !conn.open || isHost) return;
+        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+
+        // Prevent default for system-level keys to allow remote control
+        if (e.key.length === 1 || ['Enter', 'Backspace', 'Tab', 'Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+            e.preventDefault();
+            conn.send({ type: 'keyboard-key', key: e.key });
+        }
     };
 }
 
@@ -368,6 +417,26 @@ document.getElementById('btn-leave').onclick = () => {
 };
 document.getElementById('send-btn').onclick = sendMessage;
 msgInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+
+document.getElementById('btn-toggle-mic').onclick = () => {
+    const btn = document.getElementById('btn-toggle-mic');
+    const isMutedNow = btn.classList.toggle('muted');
+
+    if (localStream) {
+        const audioTracks = localStream.getAudioTracks();
+        if (audioTracks.length > 0) {
+            audioTracks.forEach(track => track.enabled = !isMutedNow);
+        } else if (!isMutedNow) {
+            // Try to capture on the fly if not already present
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(micStream => {
+                micStream.getAudioTracks().forEach(track => localStream.addTrack(track));
+            }).catch(err => {
+                console.error("Delayed mic access failed:", err);
+                btn.classList.add('muted');
+            });
+        }
+    }
+};
 
 document.getElementById('btn-toggle-chat').onclick = () => {
     chatPanel.classList.toggle('active-panel');

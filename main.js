@@ -90,9 +90,35 @@ ipcMain.on('remote-control:click', (event, { x, y }) => {
 
 ipcMain.on('remote-control:type', (event, key) => {
     if (robot) {
-        robot.keyTap(key);
+        const robotKeys = {
+            'ArrowUp': 'up',
+            'ArrowDown': 'down',
+            'ArrowLeft': 'left',
+            'ArrowRight': 'right',
+            'Enter': 'enter',
+            'Backspace': 'backspace',
+            'Escape': 'escape',
+            'Tab': 'tab'
+        };
+        const mappedKey = robotKeys[key] || key.toLowerCase();
+        try {
+            robot.keyTap(mappedKey);
+        } catch (e) {
+            console.error('RobotJS keyTap error:', e);
+        }
     } else {
-        runRemoteCommand(['type', key]);
+        const sendKeysMap = {
+            'ArrowUp': '{UP}',
+            'ArrowDown': '{DOWN}',
+            'ArrowLeft': '{LEFT}',
+            'ArrowRight': '{RIGHT}',
+            'Enter': '{ENTER}',
+            'Backspace': '{BACKSPACE}',
+            'Escape': '{ESC}',
+            'Tab': '{TAB}'
+        };
+        const mappedKey = sendKeysMap[key] || key;
+        runRemoteCommand(['type', mappedKey]);
     }
 });
 
