@@ -15,3 +15,11 @@
 - [x] PeerJS Signaling
 - [x] Basic frontend layout
 - [x] C# Remote Control Helper (Zero-Dependency)
+
+## Phase 2: Refinement & Features (COMPLETED - v1.0.7)
+- [x] Bidirectional Audio (Talking Option)
+- [x] Enhanced Window Controls (Top-Left tray feel)
+- [x] Full Keyboard Remote Control
+- [x] Custom Application Icon & Branding
+- [x] SmartScreen & Code Signing metadata
+- [x] Documentation & Old Releases history
