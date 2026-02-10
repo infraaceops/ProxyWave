@@ -17,15 +17,17 @@
         "directories": {
             "output": "dist"
         },
-        "icon": "assets/icon.png",
+        "icon": "client/assets/icon.png",
         "win": {
             "target": "nsis",
-            "icon": "assets/icon.png"
+            "icon": "client/assets/icon.png",
+            "publisherName": "Shadab (InfraAceOps)",
+            "verifyUpdateCodeSignature": false
         },
         "mac": {
             "target": "dmg",
             "category": "public.app-category.video",
-            "icon": "assets/icon.png"
+            "icon": "client/assets/icon.png"
         },
         "linux": {
             "target": [
@@ -37,7 +39,7 @@
             "main.js",
             "preload.js",
             "RemoteControl.exe",
-            "assets/icon.png",
+            "client/assets/icon.png",
             "client/**/*",
             "node_modules/**/*"
         ]

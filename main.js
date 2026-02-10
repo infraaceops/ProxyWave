@@ -43,7 +43,7 @@ function createWindow() {
         width: 1200,
         height: 800,
         titleBarStyle: 'hidden',
-        icon: path.join(__dirname, 'assets/icon.png'),
+        icon: path.join(__dirname, 'client/assets/icon.png'),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
