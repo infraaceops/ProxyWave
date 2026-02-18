@@ -1,6 +1,6 @@
 {
     "name": "proxy-wave",
-    "version": "v1.0.7",
+    "version": "v1.0.8",
     "description": "High-performance Remote Desktop & Screen Sharing",
     "author": "Shadab <shadab@infraaceops.com>",
     "main": "main.js",
@@ -9,7 +9,8 @@
         "build": "electron-builder build",
         "build:win": "electron-builder build --win",
         "build:mac": "electron-builder build --mac",
-        "build:linux": "electron-builder build --linux"
+        "build:linux": "electron-builder build --linux",
+        "release": "node update-release.js"
     },
     "build": {
         "appId": "com.proxywave.app",
@@ -19,13 +20,24 @@
         },
         "icon": "client/assets/icon.png",
         "win": {
-            "target": "nsis",
+            "target": [
+                "nsis",
+                "portable"
+            ],
             "icon": "client/assets/icon.png",
             "publisherName": "Shadab (InfraAceOps)",
-            "verifyUpdateCodeSignature": false
+            "verifyUpdateCodeSignature": false,
+            "nsis": {
+                "perMachine": true,
+                "allowToChangeInstallationDirectory": true,
+                "oneClick": false
+            }
         },
         "mac": {
-            "target": "dmg",
+            "target": [
+                "dmg",
+                "zip"
+            ],
             "category": "public.app-category.video",
             "icon": "client/assets/icon.png"
         },

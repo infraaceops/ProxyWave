@@ -9,5 +9,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     minimizeWindow: () => ipcRenderer.send('window:minimize'),
     maximizeWindow: () => ipcRenderer.send('window:maximize'),
     closeWindow: () => ipcRenderer.send('window:close'),
+    launchRDP: (address) => ipcRenderer.send('remote-control:launch-rdp', address),
+    enableRDP: () => ipcRenderer.invoke('remote-control:enable-rdp'),
     isElectron: true
 });

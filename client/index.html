@@ -40,23 +40,28 @@
                 </div>
 
                 <div id="host-panel" class="tab-content active">
-                    <div class="input-group">
-                        <label for="host-password">Set Access Password</label>
-                        <input type="password" id="host-password" placeholder="Enter a secure password">
+                    <div class="info-card">
+                        <label>Your PC IP Address</label>
+                        <div class="ip-display">
+                            <span id="local-ip">Loading...</span>
+                            <button id="copy-ip-btn" class="mini-icon-btn">📋</button>
+                        </div>
                     </div>
-                    <button id="start-host-btn" class="primary-btn">Start Sharing Screen</button>
+                    <div class="input-group">
+                        <label for="host-password">Access Password (Optional)</label>
+                        <input type="password" id="host-password" placeholder="RDP usually uses Windows credentials">
+                    </div>
+                    <button id="start-host-btn" class="primary-btn">Enable Remote Access</button>
+                    <p class="hint-text">Ensure "Remote Desktop" is enabled in Windows Settings.</p>
                 </div>
 
                 <div id="join-panel" class="tab-content">
                     <div class="input-group">
-                        <label for="room-id">Session ID</label>
-                        <input type="text" id="room-id" placeholder="Enter Session ID">
+                        <label for="room-id">PC IP / Address</label>
+                        <input type="text" id="room-id" placeholder="e.g. 192.168.1.10 or computer-name">
                     </div>
-                    <div class="input-group">
-                        <label for="join-password">Password</label>
-                        <input type="password" id="join-password" placeholder="Enter Password">
-                    </div>
-                    <button id="join-btn" class="primary-btn">Connect & Control</button>
+                    <button id="join-btn" class="primary-btn">Connect via RDP</button>
+                    <p class="hint-text">Uses built-in Windows Remote Desktop</p>
                 </div>
 
                 <div class="status-bar" id="setup-status">

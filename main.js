@@ -122,9 +122,23 @@ ipcMain.on('remote-control:type', (event, key) => {
     }
 });
 
+function getLocalIP() {
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)) {
+        for (const iface of interfaces[name]) {
+            if (!iface.internal && iface.family === 'IPv4') {
+                return iface.address;
+            }
+        }
+    }
+    return '127.0.0.1';
+}
+
 ipcMain.handle('get-machine-info', () => {
     return {
         id: getMachineId(),
+        ip: getLocalIP(),
+        platform: process.platform,
         username: os.userInfo().username || 'User',
         hostname: os.hostname()
     };
@@ -150,3 +164,32 @@ ipcMain.on('window:maximize', () => {
 ipcMain.on('window:close', () => {
     BrowserWindow.getFocusedWindow()?.close();
 });
+
+ipcMain.on('remote-control:launch-rdp', (event, address) => {
+    if (process.platform === 'win32') {
+        execFile('mstsc.exe', [`/v:${address}`]);
+    }
+});
+
+ipcMain.handle('remote-control:enable-rdp', async () => {
+    if (process.platform !== 'win32') return { success: false, error: 'Only supported on Windows' };
+
+    const script = `
+        Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server' -Name "fDenyTSConnections" -Value 0;
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop";
+        Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp' -Name "UserAuthentication" -Value 1;
+    `;
+
+    return new Promise((resolve) => {
+        const psCommand = `Start-Process powershell -Verb RunAs -ArgumentList "-Command & {${script}}"`;
+        execFile('powershell.exe', ['-Command', psCommand], (error) => {
+            if (error) {
+                resolve({ success: false, error: error.message });
+            } else {
+                resolve({ success: true });
+            }
+        });
+    });
+});
+
+

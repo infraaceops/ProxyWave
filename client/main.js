@@ -6,14 +6,30 @@ let isHost = false;
 let hostPassword = '';
 let systemUsername = 'User';
 let machineId = null;
+let currentPlatform = 'win32';
 
 async function initialize() {
     if (window.electronAPI && window.electronAPI.getMachineInfo) {
         const info = await window.electronAPI.getMachineInfo();
         systemUsername = info.username;
         machineId = info.id;
+        currentPlatform = info.platform || 'win32';
+        if (info.ip) {
+            document.getElementById('local-ip').innerText = info.ip;
+        }
     }
 
+    document.getElementById('copy-ip-btn').onclick = () => {
+        const ip = document.getElementById('local-ip').innerText;
+        navigator.clipboard.writeText(ip).then(() => {
+            const btn = document.getElementById('copy-ip-btn');
+            btn.innerText = '✅';
+            setTimeout(() => btn.innerText = '📋', 2000);
+        });
+    };
+
+    // PeerJS initialization disabled for simple RDP logic
+    /*
     peer = new Peer(machineId, {
         config: {
             iceServers: [
@@ -24,30 +40,17 @@ async function initialize() {
     });
 
     setupPeerListeners();
+    */
+    statusText.innerText = `Hi ${systemUsername}, Ready for RDP.`;
+    statusText.style.color = '#34c759';
 }
 
 function setupPeerListeners() {
-    peer.on('open', (id) => {
-        statusText.innerText = `Hi ${systemUsername}, Ready. ID: ${id}`;
-        statusText.style.color = '#34c759';
-        autoReconnect();
-    });
+    // Disabled
+}
 
-    peer.on('disconnected', () => {
-        updateStatus('Peer disconnected. Reconnecting...');
-        peer.reconnect();
-    });
 
-    peer.on('error', (err) => {
-        console.error('Peer error:', err);
-        statusText.innerText = `Error: ${err.type}`;
-        statusText.style.color = '#ff3b30';
-
-        if (err.type === 'network' || err.type === 'server-error') {
-            setTimeout(() => peer.reconnect(), 5000);
-        }
-    });
-
+/*
     // Handling Incoming Connection (Host Side)
     peer.on('connection', (connection) => {
         conn = connection;
@@ -81,7 +84,8 @@ function setupPeerListeners() {
             videoElement.srcObject = null;
         });
     });
-}
+    */
+
 
 
 // DOM Elements
@@ -118,23 +122,30 @@ initialize();
 // --- Core Functionality ---
 
 async function startHost() {
-    const password = document.getElementById('host-password').value;
-    if (!password) return alert('Please set a password');
-    hostPassword = password;
+    if (currentPlatform !== 'win32') {
+        statusText.innerText = `Please ensure RDP/Remote Desktop is enabled in your ${currentPlatform} settings.`;
+        statusText.style.color = "#007aff";
+        updateStatus(`Host active on ${currentPlatform}`);
+        return;
+    }
 
-    if (window.electronAPI) {
-        showScreenSelector();
-    } else {
-        // Fallback for browser (though this app is designed for Electron)
-        try {
-            localStream = await navigator.mediaDevices.getDisplayMedia({
-                video: { cursor: "always" },
-                audio: true
-            });
-            completeHostSetup();
-        } catch (err) {
-            console.error("Failed to share screen:", err);
+    statusText.innerText = "Configuring Windows Settings...";
+    statusText.style.color = "#007aff";
+
+    if (window.electronAPI && window.electronAPI.enableRDP) {
+        const result = await window.electronAPI.enableRDP();
+        if (result.success) {
+            statusText.innerText = "RDP Enabled! Listening for connections...";
+            statusText.style.color = "#34c759";
+            updateStatus('Host active (RDP Enabled)');
+        } else {
+            statusText.innerText = "Failed to enable RDP. Please check admin rights.";
+            statusText.style.color = "#ff3b30";
+            alert("Error: " + result.error);
         }
+    } else {
+        statusText.innerText = "Listening for Built-in RDP connections...";
+        updateStatus('Host active (RDP)');
     }
 }
 
@@ -213,18 +224,20 @@ document.getElementById('cancel-share').onclick = () => {
 };
 
 function joinSession() {
-    const roomId = document.getElementById('room-id').value;
-    const password = document.getElementById('join-password').value;
+    const address = document.getElementById('room-id').value;
+    if (!address) return alert('PC Address is required');
 
-    if (!roomId) return alert('Session ID is required');
-
-    conn = peer.connect(roomId);
-
-    conn.on('open', () => {
-        conn.send({ type: 'auth', password: password });
-    });
-
-    setupDataListeners();
+    if (currentPlatform === 'win32') {
+        if (window.electronAPI && window.electronAPI.launchRDP) {
+            window.electronAPI.launchRDP(address);
+            updateStatus(`Launching Windows RDP to ${address}...`);
+        }
+    } else {
+        // macOS / Linux: Try to open via rdp:// protocol (common for RDP clients)
+        alert(`On ${currentPlatform}, please use your RDP client (like Remmina or MS Remote Desktop) to connect to: ${address}`);
+        window.open(`rdp://${address}`);
+        updateStatus(`Attempting to open RDP link for ${address}...`);
+    }
 }
 
 function setupDataListeners() {

@@ -254,6 +254,34 @@ input:focus {
     text-align: center;
 }
 
+/* RDP Specific Styles */
+.info-card {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid var(--glass-border);
+}
+
+.ip-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.hint-text {
+    margin-top: 12px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-align: center;
+}
+
+
 /* Meeting Screen */
 #meeting-screen {
     flex-direction: column;
