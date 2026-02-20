@@ -174,15 +174,19 @@ ipcMain.on('remote-control:launch-rdp', (event, address) => {
 ipcMain.handle('remote-control:enable-rdp', async () => {
     if (process.platform !== 'win32') return { success: false, error: 'Only supported on Windows' };
 
-    const script = `
-        Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server' -Name "fDenyTSConnections" -Value 0;
-        Enable-NetFirewallRule -DisplayGroup "Remote Desktop";
-        Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp' -Name "UserAuthentication" -Value 1;
-    `;
+    // Use base64 encoding for the script to avoid all quoting and space interpretation issues
+    const script = "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server' -Name 'fDenyTSConnections' -Value 0; " +
+        "Enable-NetFirewallRule -DisplayGroup 'Remote Desktop'; " +
+        "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp' -Name 'UserAuthentication' -Value 1;";
+
+    // EncodedCommand requires UTF-16LE encoding
+    const encodedScript = Buffer.from(script, 'utf16le').toString('base64');
 
     return new Promise((resolve) => {
-        const psCommand = `Start-Process powershell -Verb RunAs -ArgumentList "-Command & {${script}}"`;
-        execFile('powershell.exe', ['-Command', psCommand], (error) => {
+        // We use -EncodedCommand to pass the base64 script safely through Start-Process
+        const psCommand = `Start-Process powershell -Verb RunAs -ArgumentList '-EncodedCommand ${encodedScript}'`;
+
+        execFile('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', psCommand], (error) => {
             if (error) {
                 resolve({ success: false, error: error.message });
             } else {
