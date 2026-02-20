@@ -26,12 +26,12 @@
             ],
             "icon": "client/assets/icon.png",
             "publisherName": "Shadab (InfraAceOps)",
-            "verifyUpdateCodeSignature": false,
-            "nsis": {
-                "perMachine": true,
-                "allowToChangeInstallationDirectory": true,
-                "oneClick": false
-            }
+            "verifyUpdateCodeSignature": false
+        },
+        "nsis": {
+            "perMachine": true,
+            "allowToChangeInstallationDirectory": true,
+            "oneClick": false
         },
         "mac": {
             "target": [
