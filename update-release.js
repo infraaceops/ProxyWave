@@ -70,9 +70,14 @@ function updateVersion() {
         console.log('Committing changes...');
         execSync('git add .');
         execSync(`git commit -m "chore: release ${newVersionTag}"`);
-        console.log('Pushing to main...');
-        execSync('git push origin main');
-        console.log(`Successfully updated to ${newVersionTag} and pushed changes.`);
+
+        console.log(`Creating tag ${newVersionTag}...`);
+        execSync(`git tag ${newVersionTag}`);
+
+        console.log('Pushing to main and tags...');
+        execSync('git push origin main --tags');
+
+        console.log(`Successfully updated to ${newVersionTag} and pushed changes with tag.`);
     } catch (err) {
         console.error('Git command failed:', err.message);
     }

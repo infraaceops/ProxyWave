@@ -1,6 +1,6 @@
 {
     "name": "proxy-wave",
-    "version": "v1.0.8",
+    "version": "v1.0.9",
     "description": "High-performance Remote Desktop & Screen Sharing",
     "author": "Shadab <shadab@infraaceops.com>",
     "main": "main.js",
